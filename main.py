@@ -24,11 +24,11 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-input', action='store', dest='input', type=str,
                     help='Input segmentation file ', required =True)
 
-parser.add_argument('-threshold', action='store', dest='threshold', type=int,
-                    help='Threshold for binarization (0-255) ', default = 127, required = False)
-
 parser.add_argument('-output', action='store', dest='output', type=str,
                     help='Output file prefix ', required =True)
+                    
+parser.add_argument('-threshold', action='store', dest='threshold', type=int,
+                    help='Threshold for binarization (0-255) ', default = 127, required = False)
 
 parser.add_argument('-gaussian_sigma', action='store', dest='gaussian_filter_sigma', type=str,
                     help='The sigma (pixels) of the gaussian filter. Set this to 0 to disable gaussian filter.', default = "3", required =False)                 
@@ -108,6 +108,8 @@ Image.fromarray(im).save(args.output+"_seg_before_binarization.png")
 
 # binarization
 im = im >= args.threshold
+
+Image.fromarray(im).save(args.output+"_seg_after_binarization.png")
 
 im = skimage.morphology.thin(im)
 im = im.astype('uint8')
@@ -205,7 +207,7 @@ for edge in edges:
 		
 g = graph_refine(neighbors, isolated_thr = args.connected_component_min_size, spurs_thr=args.spurs_min_size)
 g = connectDeadEnds(g, thr = args.connect_deadends_threshold)
-g = simpilfyGraph(g, e=args.polyline_simplify_threshold)
+g = simplifyGraph(g, e=args.polyline_simplify_threshold)
 
 
 # save graph in pickle format 
@@ -236,11 +238,11 @@ for nloc, nei in g.items():
     x1,y1 = int(nloc[1]), int(nloc[0])
     for nn in nei:
         x2,y2 = int(nn[1]), int(nn[0])
-        cv2.line(img, (x1,y1), (x2,y2), (255), 3)
+        cv2.line(img, (x1,y1), (x2,y2), (200), 3)
 
 for nloc, nei in g.items():
     x1,y1 = int(nloc[1]), int(nloc[0])
-    cv2.circle(img, (x1,y1), 5, (0,0,255), -1)
+    cv2.circle(img, (x1,y1), 5, (255), -1)
 
 cv2.imwrite(args.output+"graph_vis.png", img)
 
